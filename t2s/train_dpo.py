@@ -12,7 +12,7 @@ import argparse
 import time
 from pathlib import Path
 
-from .common import DEFAULT_MODEL, read_jsonl, seed_everything, train_precision, write_json
+from .common import DEFAULT_MODEL, prepare_trl_for_gpu, read_jsonl, seed_everything, train_precision, write_json
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -38,6 +38,7 @@ def main(argv: list[str] | None = None) -> None:
     from trl import DPOConfig, DPOTrainer
 
     seed_everything(args.seed)
+    prepare_trl_for_gpu()
     rows = read_jsonl(Path(args.pairs))
     if not rows:
         raise SystemExit(f"No pairs in {args.pairs}")

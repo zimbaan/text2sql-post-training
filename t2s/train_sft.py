@@ -11,7 +11,7 @@ import argparse
 import time
 from pathlib import Path
 
-from .common import DEFAULT_MODEL, seed_everything, train_precision, write_json
+from .common import DEFAULT_MODEL, prepare_trl_for_gpu, seed_everything, train_precision, write_json
 from .prompts import messages_for
 from .spider import ensure_spider, load_split, split_train, subsample
 from .sql import normalize_gold
@@ -73,6 +73,7 @@ def main(argv: list[str] | None = None) -> None:
     from trl import SFTConfig, SFTTrainer
 
     seed_everything(args.seed)
+    prepare_trl_for_gpu()
     root = ensure_spider(args.data_dir)
     sft_pool, _ = split_train(load_split(root, "train"), args.holdout, args.seed)
     examples = subsample(sft_pool, args.fraction, args.limit, args.seed)
