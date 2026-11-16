@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.hf-cache/
+data/
+runs/
+results/smoke/
+*.egg-info/
+.ipynb_checkpoints/

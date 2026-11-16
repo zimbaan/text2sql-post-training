@@ -1,0 +1,9 @@
+# torch>=2.6 is assumed to be installed already (Kaggle / Colab images ship with it).
+transformers==5.23.*
+trl==1.18.*
+peft==0.21.*
+datasets==5.2.*
+accelerate==1.15.*
+huggingface_hub==2.4.*
+matplotlib
+pytest
