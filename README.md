@@ -62,6 +62,8 @@ exists, so a re-run continues where it stopped.
 
 ```bash
 pip install -r requirements.txt
+pip uninstall -y torchao    # only if an old torchao (<0.16) is installed; PEFT refuses to load with it
+bash scripts/smoke_gpu.sh   # a few minutes: every stage with tiny limits
 bash scripts/run_pipeline.sh
 ```
 
