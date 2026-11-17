@@ -9,8 +9,36 @@ on those pairs, and evaluates every stage by **execution accuracy** on the Spide
 
 ## Results
 
-_Pending the full run. `python -m t2s.report` writes the table to `results/summary.md` and a chart to
-`results/accuracy.png`._
+Execution accuracy on all 1,034 Spider dev questions (one run, seed 0, a single Kaggle T4):
+
+| Run | Execution acc. | vs base | SQL errors | Single table (333) | Group / order (211) | Join (331) | Nested / set ops (159) |
+|---|---|---|---|---|---|---|---|
+| Base model (no training) | 45.5% | | 37.6% | 62.5% | 56.9% | 30.5% | 25.8% |
+| SFT, 25% of the SFT split | 56.0% | +10.5 pts | 26.0% | 74.5% | 69.2% | 37.5% | 38.4% |
+| SFT, full SFT split | 58.3% | +12.9 pts | 21.1% | 75.1% | 65.9% | 42.3% | 46.5% |
+| SFT on all questions (control) | 59.4% | +13.9 pts | 20.7% | 73.9% | 70.6% | 43.8% | 46.5% |
+| **SFT + DPO** | **61.3%** | **+15.9 pts** | **16.5%** | **76.9%** | 67.3% | **48.6%** | **47.2%** |
+
+![Execution accuracy by run](results/accuracy.png)
+
+**What the runs show**
+
+- **SFT does most of the work.** It lifts execution accuracy from 45.5% to 58.3% and cuts queries that fail to run
+  from 37.6% to 21.1%. A quarter of the SFT data already reaches 56.0%, so most of that gain comes early.
+- **DPO on execution-verified pairs adds 3.0 points on top of SFT** (58.3% → 61.3%) and brings SQL errors down to
+  16.5%. The largest gain is on joins (42.3% → 48.6%).
+- **The control is closer.** Spending the same 2,000 questions on more SFT reaches 59.4%, so DPO comes out
+  1.9 points ahead. With one seed and 1,034 questions the standard error is about 1.5 points per run, so this gap
+  is a signal worth testing with more seeds, not a settled result.
+
+**Preference pairs** (`results/pairs.stats.json`). The SFT model sampled 8 queries for each of the 2,000
+held-out questions. 910 questions came back all correct (skipped), 894 mixed, 195 all wrong, and for 1 the gold
+query itself failed. That gave 1,878 pairs, 1,496 of them with one of the model's own correct queries as the
+chosen side. Of the 7,856 distinct sampled queries, 4,423 were correct, 1,504 ran but returned the wrong rows,
+and 1,929 failed to execute.
+
+**Compute.** About 4.5 hours on one T4: SFT 78 min, SFT on 25% 20 min, pair mining 30 min, DPO 25 min, the
+SFT control 102 min, and about 3 min per evaluation.
 
 ## Experiments
 

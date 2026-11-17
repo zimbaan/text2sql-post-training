@@ -1,0 +1,18 @@
+{
+  "questions": 2000,
+  "num_samples": 8,
+  "temperature": 1.0,
+  "pairs": 1878,
+  "pairs_with_model_chosen": 1496,
+  "question_outcomes": {
+    "mixed": 894,
+    "all_wrong": 195,
+    "all_correct": 910,
+    "gold_failed": 1
+  },
+  "unique_sample_verdicts": {
+    "correct": 4423,
+    "wrong_result": 1504,
+    "error": 1929
+  }
+}
