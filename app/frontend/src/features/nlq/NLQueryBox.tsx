@@ -63,7 +63,9 @@ export const NLQueryBox = ({
   // Set default database and schema
   useEffect(() => {
     if (schemas?.databases?.length && !selectedDatabase) {
-      const defaultDb = connection?.default_database || schemas.databases[0].name;
+      // For SQLite default_database is the file path, which isn't in the list ("main"): fall back to the first.
+      const listed = schemas.databases.some((d) => d.name === connection?.default_database);
+      const defaultDb = listed ? connection!.default_database : schemas.databases[0].name;
       setSelectedDatabase(defaultDb);
       const db = schemas.databases.find((d) => d.name === defaultDb);
       if (db?.schemas?.length) {

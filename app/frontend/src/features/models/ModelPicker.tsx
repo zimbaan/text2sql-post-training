@@ -51,13 +51,13 @@ export const ModelPicker = () => {
               value={model.name}
               className="text-slate-100 data-[highlighted]:bg-slate-700 data-[highlighted]:text-white"
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="truncate">{model.name}</span>
+              <div className="flex min-w-0 items-center justify-between gap-2">
+                <span className="min-w-0 truncate">{model.name}</span>
                 {model.is_finetuned && (
-                  <Badge className="text-[10px] h-4 bg-violet-600 hover:bg-violet-600">fine-tuned</Badge>
+                  <Badge className="h-4 shrink-0 whitespace-nowrap px-1.5 text-[10px] bg-violet-600 hover:bg-violet-600">fine-tuned</Badge>
                 )}
                 {model.name === defaultModel?.name && !model.is_finetuned && (
-                  <Badge variant="secondary" className="text-[10px] h-4">
+                  <Badge variant="secondary" className="h-4 shrink-0 whitespace-nowrap text-[10px]">
                     default
                   </Badge>
                 )}

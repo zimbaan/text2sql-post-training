@@ -41,9 +41,8 @@
 - Configurable via environment variables
 
 ### 7. **Dependencies** (`pyproject.toml`)
-- `python-jose[cryptography]` - JWT support
-- `passlib[bcrypt]` - Password hashing
-- `bcrypt` - Encryption
+- `pyjwt` - JWT support
+- `bcrypt` - Password hashing
 
 ---
 

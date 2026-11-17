@@ -63,10 +63,14 @@ GPU. No Ollama or API key is needed for it.
 **Run it**
 
 ```bash
+# MongoDB (users and query history), e.g. locally with Docker
+docker run -d --name nl2sql-mongo -p 27017:27017 -v nl2sql-mongo-data:/data/db mongo:7
+
 # backend (Python 3.11+)
 cd app/backend
 pip install -e ".[finetuned]"     # drop [finetuned] to run without the local model
-cp .env.example .env              # set MONGO_URI and JWT_SECRET_KEY; Ollama/OpenRouter settings are optional
+cp .env.example .env              # MONGO_URI (default mongodb://localhost:27017) and JWT_SECRET_KEY;
+                                  # Ollama/OpenRouter settings are optional
 uvicorn app.main:app --port 8000
 
 # frontend

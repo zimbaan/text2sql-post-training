@@ -309,7 +309,7 @@ curl -X GET "http://localhost:8000/auth/me" \
 
 ## Security Best Practices
 
-1. ✅ **Password Hashing:** Using bcrypt via passlib
+1. ✅ **Password Hashing:** Using bcrypt
 2. ✅ **JWT Tokens:** Signed with secret key
 3. ✅ **API Keys:** Cryptographically secure random generation
 4. ✅ **Token Expiration:** Configurable expiration times

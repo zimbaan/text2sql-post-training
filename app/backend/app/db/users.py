@@ -63,7 +63,6 @@ async def create_user(user_create: UserCreate) -> UserInDB:
     doc = {
         "_id": user_id,
         "username": username,
-        "email": email,
         "full_name": user_create.full_name,
         "hashed_password": get_password_hash(user_create.password),
         "api_key": api_key,
@@ -72,6 +71,10 @@ async def create_user(user_create: UserCreate) -> UserInDB:
         "created_at": datetime.utcnow(),
         "last_login": None,
     }
+    # Only store email when given: the unique index is sparse, which skips missing fields but not nulls, so
+    # storing email=None would let only one user ever sign up without an email.
+    if email:
+        doc["email"] = email
 
     await coll.insert_one(doc)
     logger.info("Created user %s", username)
