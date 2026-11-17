@@ -13,7 +13,10 @@ def load_for_inference(model_name: str, adapter: str | None = None):
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
-    tok = AutoTokenizer.from_pretrained(adapter or model_name)
+    from pathlib import Path
+
+    has_tokenizer = adapter and (Path(adapter) / "tokenizer_config.json").exists()
+    tok = AutoTokenizer.from_pretrained(adapter if has_tokenizer else model_name)
     tok.padding_side = "left"
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token

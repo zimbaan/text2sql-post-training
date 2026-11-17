@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nl2sql-agent"
+version = "0.1.0"
+description = "FastAPI natural-language-to-SQL agent with a post-trained text-to-SQL model"
+authors = [{name = "Kapil Adhithya N"}]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic[email]>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "python-dotenv>=1.0.0",
+    "sqlalchemy>=2.0.23",
+    "psycopg2-binary>=2.9.9",
+    "pymysql>=1.1.0",
+    "sqlparse>=0.4.4",
+    "httpx>=0.25.0",
+    "python-multipart>=0.0.6",
+    "pyjwt>=2.8.0",
+    "cryptography>=41.0.0",
+    "passlib[bcrypt]>=1.7.4",
+    "bcrypt>=4.1.0",
+    "motor>=3.4.0",
+]
+
+[project.optional-dependencies]
+# Runs the post-trained text-to-SQL model (Qwen2.5-Coder-0.5B + LoRA) inside the backend.
+finetuned = [
+    "torch>=2.6",
+    "transformers>=5.0",
+    "peft>=0.21",
+    "accelerate>=1.10",
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.11.0",
+    "ruff>=0.1.6",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+

@@ -1,11 +1,15 @@
-# Text-to-SQL post-training: SFT and execution-verified DPO
+# Text-to-SQL: a post-trained model inside an NL→SQL agent
 
-How much do supervised fine-tuning (SFT) and preference optimization (DPO) improve a small open model at
-writing SQL, and is DPO on execution-checked preference pairs a better use of extra questions than more SFT?
+Two parts that work together:
 
-This repo fine-tunes **Qwen2.5-Coder-0.5B-Instruct** on the [Spider](https://yale-lily.github.io/spider)
-benchmark with LoRA, mines preference pairs by running the model's own SQL against the databases, trains DPO
-on those pairs, and evaluates every stage by **execution accuracy** on the Spider dev set.
+1. **Post-training** (`t2s/`). Fine-tunes **Qwen2.5-Coder-0.5B-Instruct** on the
+   [Spider](https://yale-lily.github.io/spider) benchmark with LoRA SFT, mines preference pairs by running the
+   model's own SQL against the databases, trains DPO on those pairs, and evaluates every stage by
+   **execution accuracy**. It asks how much SFT and DPO improve a small open model at writing SQL, and whether
+   DPO on execution-checked pairs is a better use of extra questions than more SFT.
+2. **The agent** (`app/`). A FastAPI + React app that connects to PostgreSQL, MySQL or SQLite, turns plain-English
+   questions into SQL, runs it safely, and charts the results. It serves the post-trained model (adapter in
+   `models/text2sql-qwen-dpo/`) next to general-purpose models from Ollama or OpenRouter, selectable in the UI.
 
 ## Results
 
@@ -39,6 +43,41 @@ and 1,929 failed to execute.
 
 **Compute.** About 4.5 hours on one T4: SFT 78 min, SFT on 25% 20 min, pair mining 30 min, DPO 25 min, the
 SFT control 102 min, and about 3 min per evaluation.
+
+## The agent
+
+The app in `app/` serves the trained model directly: the backend loads Qwen2.5-Coder-0.5B-Instruct, merges the
+LoRA adapter from `models/text2sql-qwen-dpo/` (the SFT + DPO run above, stored in fp16), and runs it on CPU or
+GPU. No Ollama or API key is needed for it.
+
+- **Same prompt as training.** For this model the backend sends the schema as `CREATE TABLE` statements of the
+  tables in scope, with the same system prompt used in training, and reads back plain SQL. Other models keep the
+  general JSON-planner prompt.
+- **Model picker.** The navbar lists the post-trained model (marked *fine-tuned*) and the provider's models; the
+  choice is sent with each query, and the SQL preview shows which model wrote the SQL.
+- **Safety and confidence.** Its SQL goes through the same read-only checks and row limit as any other model.
+  The confidence shown is the model's geometric-mean token probability for the query it wrote.
+- **SQLite-trained.** The model was trained on SQLite; on PostgreSQL or MySQL it still works from the
+  introspected schema, but check dialect-specific syntax.
+
+**Run it**
+
+```bash
+# backend (Python 3.11+)
+cd app/backend
+pip install -e ".[finetuned]"     # drop [finetuned] to run without the local model
+cp .env.example .env              # set MONGO_URI and JWT_SECRET_KEY; Ollama/OpenRouter settings are optional
+uvicorn app.main:app --port 8000
+
+# frontend
+cd app/frontend
+npm install
+cp .env.example .env              # VITE_API_BASE_URL=http://localhost:8000
+npm run dev                       # http://localhost:8080
+```
+
+The first start downloads the 0.5B base model (about 1 GB) and loads it in the background. On a laptop CPU a
+query then takes a few seconds. `app/backend/README.md` covers authentication, the API and the other providers.
 
 ## Experiments
 
@@ -108,7 +147,8 @@ python -m t2s.report --runs base sft dpo
 ```
 
 Spider is downloaded on first use from a pinned copy of the official release and checked against its
-SHA-256. Unit tests for SQL extraction, execution and result matching run on CPU: `pytest -q`.
+SHA-256. Unit tests for SQL extraction, execution and result matching run on CPU: `pytest -q` at the repo root,
+and `pytest -q` in `app/backend` for the agent.
 
 ## Layout
 
@@ -126,6 +166,13 @@ t2s/
 scripts/run_pipeline.sh
 notebooks/kaggle_pipeline.ipynb
 tests/
+results/          results table, chart and preference-pair stats from the full run
+models/
+  text2sql-qwen-dpo/   the trained LoRA adapter (SFT + DPO), fp16
+app/
+  backend/        FastAPI: connections, schema introspection, NL→SQL, safety checks, history, export
+    app/core/finetuned.py   loads and runs the post-trained model
+  frontend/       React + Vite UI: query playground, model picker, results, relationship graph
 ```
 
 ## Limitations
